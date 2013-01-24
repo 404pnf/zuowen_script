@@ -1,38 +1,38 @@
 # -*- coding: utf-8 -*-
 require 'fileutils'
 require 'kramdown'
+require 'yaml'
+require 'pathname'
+require 'erubis'
 
-input = ARGV[0]
-output = ARGV[1]
+inputdir = File.expand_path ARGV[0]
+# if I name this input it conflicts with the name in input = File.read('post.eruby')
+# this is a bug that hard to catch!
+outputdir = File.expand_path ARGV[1]
 
-input = input.sub('/', '') # de-slash 如果输入目录的时候有斜杠
-output = output.sub('/', '') # de-slash 如果输出目录的时候有斜杠
+files = Dir.glob("#{inputdir}/**/*.txt") # files是数组，是带有文件路径的文件
 
-files = Dir.glob("#{input}/**/*.txt") # files是数组，是带有文件路径的文件
-
-files.each do |fn| 
-  mytitle = fn.split('/')[2].sub(/-20..*$/, '') # 用文件名的部分做html head中標題
-  # p fn
+files.each_with_index do |fn,idx| 
+  content = File.read(fn)
+  yaml_front, body =  content.split(/---\n\n/)
+  mytitle = YAML.load(yaml_front)['title']
   # p mytitle
-  content = IO.read(fn)
-  # title 是作文題目
-  title =  content.split(/---\n\n/)[0] # yaml frontmatter
-  title = title.split(/\n/)[2].sub('title: ', '') #每篇文章的title都是第3行
-  # p title
-  body = content.split(/---\n\n/)[1] # 作文正文
-  # p body
-  newfn = fn.sub(/^#{input}/, "#{output}") 
-  # 新文件名，在html目录；不用担心文件名中出现posts也会被替换，以为我用的是sub，只替换找到的第一个匹配
+  html_body = Kramdown::Document.new(body, :auto_ids => false).to_html
+  newfn = fn.sub("#{inputdir}", outputdir) 
   newfn = newfn.sub(/txt$/, 'html') # 且文件后缀改为html
-
-  html_content = Kramdown::Document.new(body, :auto_ids => false).to_html
-  html_header = <<EOF
-
-  File.open(newfn, 'w') do |f|
-    f.puts html_header
-    f.puts "<h1>#{title}</h1>"
-    f.puts html_content
-    f.puts html_footer
-  end
-
+  newfn_path = Pathname.new(newfn).dirname
+  FileUtils.mkdir_p newfn_path unless File.directory?(newfn_path)
+  # here comes erubis
+  input = File.read('post.eruby')
+  eruby = Erubis::Eruby.new(input)    # create Eruby object
+  context = {
+    :mytitle => mytitle,
+    :html_body => html_body,
+  }
+  article_html =  eruby.evaluate(context)        # get result  
+  # same old file writing
+  p "generating #{newfn}"
+  File.write(newfn, article_html)
+  (puts '100 articles generated' ; break) if idx == 10
 end
+
