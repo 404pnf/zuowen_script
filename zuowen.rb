@@ -27,24 +27,6 @@ files.each do |fn|
 
   html_content = Kramdown::Document.new(body, :auto_ids => false).to_html
   html_header = <<EOF
-<!DOCTYPE html>
-<html>
-  <head>
-    <meta charset="utf-8">
-    <title>#{mytitle}</title>
-    <link href="/css/local.css" rel="stylesheet">
-    </head>
-    <body>
-EOF
-  html_footer = <<EOF
-    </body>
-    <footer>
-    <hr>
-    <a href="./">更多该校文章</a>
-    <a href="/">主页</a>
-    </footer>
-</html>
-EOF
 
   File.open(newfn, 'w') do |f|
     f.puts html_header
