@@ -11,7 +11,7 @@ DOMAIN = ARGV[1] || 'http://example.com/'
 def remove_index(inputdir)
   Find.find(inputdir) do |path|
     next unless File.basename(path) == 'index.html'
-    p "remove #{path}"
+    #p "remove #{path}"
     File.unlink path
   end
 end

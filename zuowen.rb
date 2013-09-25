@@ -32,9 +32,10 @@ def generate_zuowen(inputdir, outputdir)
     }
     article_html =  eruby.evaluate(context)        # get result
     # same old file writing
-    p "generating #{newfn}"
+    #p "generating #{newfn}"
     File.write(newfn, article_html)
-    (puts '100 articles generated' ; break) if idx == 1000
+    # 预览时少生成些文章
+    #(puts '100 articles generated' ; break) if idx == 100
   end
 end
 
@@ -48,6 +49,7 @@ def copy_asset_to_output
 end
 
 if __FILE__ == $PROGRAM_NAME
+  start_time = Time.now
   inputdir = ARGV[0] || '_posts_txt'
   outputdir = ARGV[1] || '_output/html'
   p "inputdir is #{inputdir}"
@@ -56,4 +58,5 @@ if __FILE__ == $PROGRAM_NAME
   remove_index outputdir
   gen_index outputdir
   copy_asset_to_output
+  p "共耗时 #{ (Time.now - start_time).to_i / 60 } 分钟 "
 end
