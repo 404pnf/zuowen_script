@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 require 'csv'
 require 'yaml'
 require 'fileutils'
@@ -7,8 +5,8 @@ require_relative './utils.rb'
 
 # usage: scritp.rb input_csv_file outputfolder
 
-file = File.expand_path ARGV[0]
-dir = File.expand_path ARGV[1]
+file = File.expand_path ARGV[0] || '_csv/posts-zw-2011.csv'
+dir = File.expand_path ARGV[1] || '_posts_txt/2011'
 
 CSV.foreach(file, "r") do |row|
   #  next if row[0] == "title" # 第一行是csv的header
