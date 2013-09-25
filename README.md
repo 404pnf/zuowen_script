@@ -27,3 +27,5 @@ to change layout, customize index.eruby
 
 I decided not to regeneate all plain text files just to get a correct br tag. Without line break, the aritcle info line in html file is more compact.
 
+# 在办公室imac上生成整个站点花了23分钟
+
