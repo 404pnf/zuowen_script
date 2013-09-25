@@ -24,7 +24,7 @@ def gen_index(dir)
     filelist = Dir.entries(f).reject! {|i| i == '.' or i == '..'}
     links = filelist.sort.map { |filename| [filename, CGI.escape(filename)] }
 
-    input = File.read('index.eruby')
+    input = File.read('views/index-eruby.html')
     eruby = Erubis::Eruby.new(input)    # create Eruby object
     index_html =  eruby.result(binding) # get result
 
