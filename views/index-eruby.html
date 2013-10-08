@@ -7,7 +7,7 @@
   <meta name="author" content="">
   <link rel="shortcut icon" href="/bootstrap/favicon.png">
 
-  <title> <%= title %></title>
+  <title> <%= @title %></title>
   <!-- Bootstrap core CSS -->
   <link href="/bootstrap/css/bootstrap.css" rel="stylesheet">
 
@@ -29,10 +29,10 @@
         <!-- Begin page content -->
         <div class="container">
           <div class="page-header">
-            <h1><%= title %></h1>
+            <h1><%= @title %></h1>
           </div>
           <ol>
-            <% links.each do |link| %>
+            <% @links.each do |link| %>
             <li><a href="<%= link[1] %>"><%= link[0] %></a></li>
             <% end %>
           </ol>
