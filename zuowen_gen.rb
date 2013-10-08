@@ -1,9 +1,9 @@
-# ## usage:
+# ## 使用方法
 
 #     scritp.rb input_csv_file
 # ----
 
-# ## 需要的库
+# ## 依赖的库
 require 'csv'
 require 'yaml'
 require 'fileutils'
@@ -24,12 +24,11 @@ require 'kramdown'
 # ----
 
 # ## 帮助函数
-
 # 如果有文本字段会作为文件名使用，那么去除特殊字符
 # 对于作文正文，将其格式处理整齐
-
 module ZuowenHelper
-
+  # 删除中英文标点符号
+  # ruby报告符号有重复但我怎么也看不出来哪个重复了
   def sanitize_filename str
     return '' if str.nil?
     str.gsub(/[-@\s\n.、()!?,？！，《》（）•^"\[\]\/“”]/, '_')
@@ -39,13 +38,14 @@ module ZuowenHelper
   end
 
   # 重排文章正文
+  # 删除tab
   # 所有段落顶头
-
+  # 段落之间有一个空行，先把所有换行替换成两个换行、再删除多余连续换行
   def normalize_body_text str
     return '' if str.nil?
     str.to_s.gsub(/\t/, " ") # no tabs
-      .gsub(/^ +/, "") # 段落开头的空格不要
-      .gsub(/\r/, "\n")   # 段落之间有一个空行，先把所有换行替换成两个换行、再删除多余连续换行
+      .gsub(/^ +/, "")
+      .gsub(/\r/, "\n")
       .gsub(/\n/, "\n\n")
       .gsub(/\n\n+/, "\n\n")
   end
@@ -53,8 +53,7 @@ module ZuowenHelper
   module_function :sanitize_filename, :normalize_body_text
 end
 
-# ## 封
-
+# ## 封装作文对象
 class ZuowenFile
   include ZuowenHelper
 
@@ -64,8 +63,11 @@ class ZuowenFile
   OUTPUT = '_newoutput'
 
   # hash的键就是csv的header，转为了symbol
+  # 必须先把csv转成hash，用to_hash 因为不能直接将csv::table作为hash使用
+  # 虽然在irb中CSV::table能像hash一样用，但创建对象的时候如果直接将csv作为hash用
+  # 会报无法找到键对应的值
   def initialize(csv)
-    @h = csv.to_hash # 必须有这个 to_hash 因为不能直接将csv::table作为hash使用
+    @h = csv.to_hash
     @h[:title] = @h[:title].gsub(/\s+/, ' ').strip
     @h[:body] = normalize_body_text @h[:body]
     @h[:body] = Kramdown::Document.new(@h[:body], :auto_ids => false).to_html
@@ -100,13 +102,12 @@ class ZuowenFile
 end
 
 # ## 脚本
+# 1. 计时
+# 2. CSV#table 中用converters: nil 是为了不把数字撰文fixnum，保持string
+#  这样在如果使用这些数字作为文件名等，不需要做to_s
 if __FILE__ == $PROGRAM_NAME
-  # 计时
   start = Time.now
   input = ARGV[0] || '_csv/new-2009.csv'
-  # || '_csv/new-2011.csv'
-  # converters: nil 是为了不把数字撰文fixnum，保持string
-  # 这样在如果使用这些数字作为文件名等，不需要做to_s
   CSV.table(input, converters: nil).each { |e| ZuowenFile.new(e).write}
   duration = (Time.now - start).div 60
   puts "耗时 #{duration} 分钟"
@@ -158,8 +159,8 @@ end
 # 2009年还有写文章body只有一些换行符
 #     >> c.select { |e| e[:body] =~ /\A\s+\z/ }.size=> 41
 # 举例
-# #<CSV::Row title:"在迎接世博的日子里" body:"\n" nid:"52753" date:"2009-10-24"
-# #<CSV::Row title:"漫谈城市未来" body:"\n" nid:"54559" date:"2009-10-24"
+# <CSV::Row title:"在迎接世博的日子里" body:"\n" nid:"52753" date:"2009-10-24"
+# <CSV::Row title:"漫谈城市未来" body:"\n" nid:"54559" date:"2009-10-24"
 
 # 这个bug非常隐蔽，引起的错误是
 # initialize': undefined method `[]=' for nil:NilClass (NoMethodError)
@@ -175,9 +176,9 @@ end
 # 方便将数组转为csv字符串的库
 # 其实csv自己带了这个
 # CSV#
-class Array
-  require 'csv'
-  def to_csv
-    each_with_object('') { |e, o| o << CSV.generate_line(e, headers: true, force_quotes: true)}
-  end
-end
+#class Array
+#  require 'csv'
+#  def to_csv
+#    each_with_object('') { |e, o| o << CSV.generate_line(e, headers: true, force_quotes: true)}
+#  end
+#end
