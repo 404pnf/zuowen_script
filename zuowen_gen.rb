@@ -59,8 +59,8 @@ class ZuowenFile
 
   # 注意这几个常量
   # 我现在的水平也就这么写了
-  TPL = 'views/newpost-eruby.html'
-  OUTPUT = '_newoutput'
+  TPL = 'views/post-eruby.html'
+  OUTPUT = '_output'
 
   # hash的键就是csv的header，转为了symbol
   # 必须先把csv转成hash，用to_hash 因为不能直接将csv::table作为hash使用

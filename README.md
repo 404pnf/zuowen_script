@@ -1,24 +1,19 @@
-# using 20xx-csv2txt.rb to generate plain text files from db.csv
+# 生成站点
 
-usage:
+		zuowen_gen.rob _csv/new-2011.csv
+		zuowen_gen.rob _csv/new-2009.csv
 
-    2011-csv2txt.rb db.csv outpudir
+生成的html在_output目录。
 
-# convert plain text files to html files
-
-usage:
-
-    zuowen.rb inputdir outputdir
-
-to change layout, cusomize post.eruby
+修改文章模版 views/post-eruby.html
 
 # generate index.html for website
 
 usauge:
 
-   gen_index.rb dir
+   gen-index-oop.rb _output
 
-to change layout, customize index.eruby 
+to change layout, customize views/index-eruby.html
 
 # how to make a proper <br> in kramdown
 
@@ -27,5 +22,5 @@ to change layout, customize index.eruby
 
 I decided not to regeneate all plain text files just to get a correct br tag. Without line break, the aritcle info line in html file is more compact.
 
-# 在办公室imac上生成整个站点花了23分钟
+# 在办公室imac上生成整个站点花了13分钟
 
