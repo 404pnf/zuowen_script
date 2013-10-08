@@ -102,7 +102,7 @@
 
   <span class="function"><span class="keyword">def</span> <span class="title">sanitize_filename</span> </span>str
     <span class="keyword">return</span> <span class="string">''</span> <span class="keyword">if</span> str.<span class="keyword">nil</span>?
-    str.to_s.gsub(<span class="regexp">/[-@\s\n.、()!?,？！，《》（）•^"\[\]\/“”‘]/</span>, <span class="string">'_'</span>)
+    str.gsub(<span class="regexp">/[-@\s\n.、()!?,？！，《》（）•^"\[\]\/“”]/</span>, <span class="string">'_'</span>)
       .gsub(<span class="regexp">/_+/</span>, <span class="string">'_'</span>)
       .gsub(<span class="regexp">/_$/</span>, <span class="string">''</span>)
       .gsub(<span class="regexp">/^_/</span>, <span class="string">''</span>)
@@ -143,7 +143,7 @@
               <div class="pilwrap for-h2">
                 <a class="pilcrow" href="#section-7">&#182;</a>
               </div>
-              <h2>封装</h2>
+              <h2>封</h2>
 
             </div>
             
@@ -180,14 +180,15 @@
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>  <span class="function"><span class="keyword">def</span> <span class="title">initialize</span><span class="params">(hash)</span></span>
-    <span class="variable">@h</span> = hash
-    <span class="variable">@context</span>[<span class="symbol">:title</span>] = <span class="variable">@h</span>[<span class="symbol">:title</span>].to_s.gsub(<span class="regexp">/\s+/</span>, <span class="string">' '</span>)
-    <span class="variable">@context</span>[<span class="symbol">:body</span>] = normalize_body_text <span class="variable">@h</span>[<span class="symbol">:body</span>].to_s
-    <span class="variable">@context</span>[<span class="symbol">:body</span>] = <span class="constant">Kramdown::Document</span>.new(<span class="variable">@context</span>[<span class="symbol">:body</span>], <span class="symbol">:auto_ids</span> =&gt; <span class="keyword">false</span>).to_html
-    <span class="variable">@context</span>[<span class="symbol">:title_in_filename</span>] = sanitize_filename(<span class="variable">@h</span>[<span class="symbol">:title</span>].to_s)
-    <span class="variable">@context</span>[<span class="symbol">:name</span>] = sanitize_filename <span class="variable">@h</span>[<span class="symbol">:name</span>].to_s
-    <span class="variable">@context</span>[<span class="symbol">:year</span>] = <span class="variable">@h</span>[<span class="symbol">:date</span>].to_s.slice(<span class="number">0</span>..<span class="number">3</span>).to_s <span class="comment"># :date -&gt; 2009-10-21</span>
+            <div class="content"><div class='highlight'><pre>  <span class="function"><span class="keyword">def</span> <span class="title">initialize</span><span class="params">(csv)</span></span>
+    <span class="variable">@h</span> = csv.to_hash <span class="comment"># 必须有这个 to_hash 因为不能直接将csv::table作为hash使用</span>
+    <span class="variable">@h</span>[<span class="symbol">:title</span>] = <span class="variable">@h</span>[<span class="symbol">:title</span>].gsub(<span class="regexp">/\s+/</span>, <span class="string">' '</span>).strip
+    <span class="variable">@h</span>[<span class="symbol">:body</span>] = normalize_body_text <span class="variable">@h</span>[<span class="symbol">:body</span>]
+    <span class="variable">@h</span>[<span class="symbol">:body</span>] = <span class="constant">Kramdown::Document</span>.new(<span class="variable">@h</span>[<span class="symbol">:body</span>], <span class="symbol">:auto_ids</span> =&gt; <span class="keyword">false</span>).to_html
+    <span class="variable">@h</span>[<span class="symbol">:title_in_filename</span>] = sanitize_filename(<span class="variable">@h</span>[<span class="symbol">:title</span>])
+    <span class="variable">@h</span>[<span class="symbol">:name</span>] = sanitize_filename <span class="variable">@h</span>[<span class="symbol">:name</span>]
+    <span class="variable">@h</span>[<span class="symbol">:year</span>] = <span class="variable">@h</span>[<span class="symbol">:date</span>].slice(<span class="number">0</span>..<span class="number">3</span>) <span class="comment"># :date -&gt; 2009-10-21</span>
+    <span class="variable">@context</span> = <span class="variable">@h</span>.dup
   <span class="keyword">end</span></pre></div></div>
             
         </li>
@@ -228,7 +229,7 @@
             </div>
             
             <div class="content"><div class='highlight'><pre>  <span class="function"><span class="keyword">def</span> <span class="title">filename</span></span>
-    <span class="variable">@context</span>[<span class="symbol">:name</span>].to_s + <span class="string">'_'</span> + <span class="variable">@context</span>[<span class="symbol">:title_in_filename</span>].to_s
+    <span class="variable">@context</span>[<span class="symbol">:name</span>] + <span class="string">'_'</span> + <span class="variable">@context</span>[<span class="symbol">:title_in_filename</span>]
   <span class="keyword">end</span></pre></div></div>
             
         </li>
@@ -245,7 +246,7 @@
             </div>
             
             <div class="content"><div class='highlight'><pre>  <span class="function"><span class="keyword">def</span> <span class="title">folder</span></span>
-    <span class="constant">File</span>.join(<span class="constant">OUTPUT</span>, <span class="variable">@context</span>[<span class="symbol">:year</span>].to_s, <span class="variable">@context</span>[<span class="symbol">:district</span>].to_s, <span class="variable">@context</span>[<span class="symbol">:school</span>].to_s)
+    <span class="constant">File</span>.join(<span class="constant">OUTPUT</span>, <span class="variable">@context</span>[<span class="symbol">:year</span>], <span class="variable">@context</span>[<span class="symbol">:district</span>], <span class="variable">@context</span>[<span class="symbol">:school</span>])
   <span class="keyword">end</span>
 
 <span class="keyword">end</span></pre></div></div>
@@ -256,10 +257,10 @@
         <li id="section-13">
             <div class="annotation">
               
-              <div class="pilwrap ">
+              <div class="pilwrap for-h2">
                 <a class="pilcrow" href="#section-13">&#182;</a>
               </div>
-              <p>脚本</p>
+              <h2>脚本</h2>
 
             </div>
             
@@ -327,7 +328,7 @@ a complete CSV String. Headers will be listed first, then all of the
 field rows.
 This method assumes you want the #headers, unless you explicitly pass :write_headers =&gt; false.</p>
 <h2>我们预处理一下数据文件</h2>
-<p>之前的数据库中有一些文章信息不全，这里我们先删除这些条目</p>
+<h3>之前的数据库中有一些文章信息不全，这里我们先删除这些条目</h3>
 <pre><code>&gt;&gt; require &#39;csv&#39;
 =&gt; true
 &gt;&gt; c = CSV.table &#39;2011.csv&#39;, converters: nil; nil
@@ -343,7 +344,14 @@ This method assumes you want the #headers, unless you explicitly pass :write_hea
 <p>在后面也要处理。</p>
 <p>2009年还有些文章body也是空的，也去除掉</p>
 <pre><code>&gt;&gt; c.delete_if { |e| e[:name] == &#39;&#39; || e[:school] == &#39;&#39; || e[:title] == &#39;&#39; || e[:district] == &#39;&#39; || e[:date] == &#39;&#39; || e[:body] == &#39;&#39; }</code></pre>
-<p>把删除了无效条目的后的csv存起来</p>
+<p>2009年还有写文章body只有一些换行符</p>
+<pre><code>&gt;&gt; c.select { |e| e[:body] =~ /\A\s+\z/ }.size=&gt; 41</code></pre>
+<p>举例</p>
+<h1>&lt;CSV::Row title:&quot;在迎接世博的日子里&quot; body:&quot;\n&quot; nid:&quot;52753&quot; date:&quot;2009-10-24&quot;</h1>
+<h1>&lt;CSV::Row title:&quot;漫谈城市未来&quot; body:&quot;\n&quot; nid:&quot;54559&quot; date:&quot;2009-10-24&quot;</h1>
+<p>这个bug非常隐蔽，引起的错误是
+initialize&#39;: undefined method `[]=&#39; for nil:NilClass (NoMethodError)</p>
+<h3>把删除了无效条目的后的csv存起来</h3>
 <pre><code>&gt;&gt; cc = c.to_csv(headers: true, force_quotes: true);nil
 =&gt; nil
 &gt;&gt; File.write(&#39;new-2011.csv&#39;, cc)
