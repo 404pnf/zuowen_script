@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+  <title>2011.rb</title>
+  <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  <meta name="viewport" content="width=device-width, target-densitydpi=160dpi, initial-scale=1.0; maximum-scale=1.0; user-scalable=0;">
+  <link rel="stylesheet" media="all" href="docco.css" />
+</head>
+<body>
+  <div id="container">
+    <div id="background"></div>
+    
+    <ul class="sections">
+        
+          <li id="title">
+              <div class="annotation">
+                  <h1>2011.rb</h1>
+              </div>
+          </li>
+        
+        
+        
+        <li id="section-1">
+            <div class="annotation">
+              
+              <div class="pilwrap for-h2">
+                <a class="pilcrow" href="#section-1">&#182;</a>
+              </div>
+              <h2>usage:</h2>
+<pre><code>scritp.rb input_csv_file</code></pre>
+<hr>
+
+            </div>
+            
+        </li>
+        
+        
+        <li id="section-2">
+            <div class="annotation">
+              
+              <div class="pilwrap for-h2">
+                <a class="pilcrow" href="#section-2">&#182;</a>
+              </div>
+              <h2>需要的库</h2>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="keyword">require</span> <span class="string">'csv'</span>
+<span class="keyword">require</span> <span class="string">'yaml'</span>
+<span class="keyword">require</span> <span class="string">'fileutils'</span>
+<span class="keyword">require</span> <span class="string">'erubis'</span>
+<span class="keyword">require</span> <span class="string">'kramdown'</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-3">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-3">&#182;</a>
+              </div>
+              <hr>
+
+            </div>
+            
+        </li>
+        
+        
+        <li id="section-4">
+            <div class="annotation">
+              
+              <div class="pilwrap for-h2">
+                <a class="pilcrow" href="#section-4">&#182;</a>
+              </div>
+              <h2>数据文件格式</h2>
+<p>数据文件是09年和11年上海中学生作文比赛。从drupal站点导出为csv格式。
+确保csv的headers包含以下信息并且拼写正确。因为这些header字符会作为键出现在模版文件中。</p>
+<p>name, title, body, date, district, school</p>
+<p>必须有至少以上几个header的数据，且header名称拼写必须和上面完全一样</p>
+<hr>
+
+            </div>
+            
+        </li>
+        
+        
+        <li id="section-5">
+            <div class="annotation">
+              
+              <div class="pilwrap for-h2">
+                <a class="pilcrow" href="#section-5">&#182;</a>
+              </div>
+              <h2>帮助函数</h2>
+<p>如果有文本字段会作为文件名使用，那么去除特殊字符
+对于作文正文，将其格式处理整齐</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="class"><span class="keyword">module</span> <span class="title">ZuowenHelper</span></span>
+
+  <span class="function"><span class="keyword">def</span> <span class="title">sanitize_filename</span> </span>str
+    <span class="keyword">return</span> <span class="string">''</span> <span class="keyword">if</span> str.<span class="keyword">nil</span>?
+    str.to_s.gsub(<span class="regexp">/[-@\s\n.、()!?,？！，《》（）•^"\[\]\/“”‘]/</span>, <span class="string">'_'</span>)
+      .gsub(<span class="regexp">/_+/</span>, <span class="string">'_'</span>)
+      .gsub(<span class="regexp">/_$/</span>, <span class="string">''</span>)
+      .gsub(<span class="regexp">/^_/</span>, <span class="string">''</span>)
+  <span class="keyword">end</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-6">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-6">&#182;</a>
+              </div>
+              <p>重排文章正文
+所有段落顶头</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  <span class="function"><span class="keyword">def</span> <span class="title">normalize_body_text</span> </span>str
+    <span class="keyword">return</span> <span class="string">''</span> <span class="keyword">if</span> str.<span class="keyword">nil</span>?
+    str.to_s.gsub(<span class="regexp">/\t/</span>, <span class="string">" "</span>) <span class="comment"># no tabs</span>
+      .gsub(<span class="regexp">/^ +/</span>, <span class="string">""</span>) <span class="comment"># 段落开头的空格不要</span>
+      .gsub(<span class="regexp">/\r/</span>, <span class="string">"\n"</span>)   <span class="comment"># 段落之间有一个空行，先把所有换行替换成两个换行、再删除多余连续换行</span>
+      .gsub(<span class="regexp">/\n/</span>, <span class="string">"\n\n"</span>)
+      .gsub(<span class="regexp">/\n\n+/</span>, <span class="string">"\n\n"</span>)
+  <span class="keyword">end</span>
+
+  module_function <span class="symbol">:sanitize_filename</span>, <span class="symbol">:normalize_body_text</span>
+<span class="keyword">end</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-7">
+            <div class="annotation">
+              
+              <div class="pilwrap for-h2">
+                <a class="pilcrow" href="#section-7">&#182;</a>
+              </div>
+              <h2>封装</h2>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="class"><span class="keyword">class</span> <span class="title">ZuowenFile</span></span>
+  <span class="keyword">include</span> <span class="constant">ZuowenHelper</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-8">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-8">&#182;</a>
+              </div>
+              <p>注意这几个常量
+我现在的水平也就这么写了</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  <span class="constant">TPL</span> = <span class="string">'views/newpost-eruby.html'</span>
+  <span class="constant">OUTPUT</span> = <span class="string">'_newoutput'</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-9">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-9">&#182;</a>
+              </div>
+              <p>hash的键就是csv的header，转为了symbol</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  <span class="function"><span class="keyword">def</span> <span class="title">initialize</span><span class="params">(hash)</span></span>
+    <span class="variable">@h</span> = hash
+    <span class="variable">@context</span>[<span class="symbol">:title</span>] = <span class="variable">@h</span>[<span class="symbol">:title</span>].to_s.gsub(<span class="regexp">/\s+/</span>, <span class="string">' '</span>)
+    <span class="variable">@context</span>[<span class="symbol">:body</span>] = normalize_body_text <span class="variable">@h</span>[<span class="symbol">:body</span>].to_s
+    <span class="variable">@context</span>[<span class="symbol">:body</span>] = <span class="constant">Kramdown::Document</span>.new(<span class="variable">@context</span>[<span class="symbol">:body</span>], <span class="symbol">:auto_ids</span> =&gt; <span class="keyword">false</span>).to_html
+    <span class="variable">@context</span>[<span class="symbol">:title_in_filename</span>] = sanitize_filename(<span class="variable">@h</span>[<span class="symbol">:title</span>].to_s)
+    <span class="variable">@context</span>[<span class="symbol">:name</span>] = sanitize_filename <span class="variable">@h</span>[<span class="symbol">:name</span>].to_s
+    <span class="variable">@context</span>[<span class="symbol">:year</span>] = <span class="variable">@h</span>[<span class="symbol">:date</span>].to_s.slice(<span class="number">0</span>..<span class="number">3</span>).to_s <span class="comment"># :date -&gt; 2009-10-21</span>
+  <span class="keyword">end</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-10">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-10">&#182;</a>
+              </div>
+              <p>绑定@context到eruby模版</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  <span class="function"><span class="keyword">def</span> <span class="title">write</span></span>
+    <span class="constant">FileUtils</span>.mkdir_p(<span class="keyword">self</span>.folder) <span class="keyword">unless</span> <span class="constant">File</span>.exists?(<span class="keyword">self</span>.folder)
+    eruby = <span class="constant">Erubis::Eruby</span>.new(<span class="constant">File</span>.read(<span class="constant">TPL</span>))
+    post =  eruby.evaluate(<span class="variable">@context</span>)
+    out = <span class="constant">File</span>.join(<span class="keyword">self</span>.folder, <span class="keyword">self</span>.filename + <span class="string">'.html'</span>)
+    p <span class="string">"generating <span class="subst">#{out}</span>"</span>
+    <span class="constant">File</span>.write(out, post)
+  <span class="keyword">end</span>
+
+  protected</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-11">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-11">&#182;</a>
+              </div>
+              <p>单篇文章的文件名，格式 姓名_文章标题</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  <span class="function"><span class="keyword">def</span> <span class="title">filename</span></span>
+    <span class="variable">@context</span>[<span class="symbol">:name</span>].to_s + <span class="string">'_'</span> + <span class="variable">@context</span>[<span class="symbol">:title_in_filename</span>].to_s
+  <span class="keyword">end</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-12">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-12">&#182;</a>
+              </div>
+              <p>生成的文件夹，格式 输出目录 / 年 / 区 / 学校</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  <span class="function"><span class="keyword">def</span> <span class="title">folder</span></span>
+    <span class="constant">File</span>.join(<span class="constant">OUTPUT</span>, <span class="variable">@context</span>[<span class="symbol">:year</span>].to_s, <span class="variable">@context</span>[<span class="symbol">:district</span>].to_s, <span class="variable">@context</span>[<span class="symbol">:school</span>].to_s)
+  <span class="keyword">end</span>
+
+<span class="keyword">end</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-13">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-13">&#182;</a>
+              </div>
+              <p>脚本</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="keyword">if</span> __FILE_<span class="number">_</span> == <span class="variable">$PROGRAM_NAME</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-14">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-14">&#182;</a>
+              </div>
+              <p>计时</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  start = <span class="constant">Time</span>.now
+  input = <span class="constant">ARGV</span>[<span class="number">0</span>] || <span class="string">'_csv/new-2009.csv'</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-15">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-15">&#182;</a>
+              </div>
+              <p>|| &#39;_csv/new-2011.csv&#39;
+converters: nil 是为了不把数字撰文fixnum，保持string
+这样在如果使用这些数字作为文件名等，不需要做to_s</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  <span class="constant">CSV</span>.table(input, <span class="symbol">converters:</span> <span class="keyword">nil</span>).each { |e| <span class="constant">ZuowenFile</span>.new(e).write}
+  duration = (<span class="constant">Time</span>.now - start).div <span class="number">60</span>
+  puts <span class="string">"耗时 <span class="subst">#{duration}</span> 分钟"</span>
+<span class="keyword">end</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-16">
+            <div class="annotation">
+              
+              <div class="pilwrap for-h2">
+                <a class="pilcrow" href="#section-16">&#182;</a>
+              </div>
+              <h2>一些处理CSV文件相关的命令</h2>
+<p>CSV header, no space is allowed, space will be converted to underscore &#39;_&#39;
+name,school_and_district,grade,type,title,body,nid,date</p>
+<p>如果csv某列数据为空，那么会是空字符串 &quot;&quot;</p>
+<p>使用CSV#table时添加 converters: nil
+否则会把数字转换为fixnum。我不希望这样
+  c = CSV.table(&#39;t.csv&#39;, converters: nil, force_quotes: true)</p>
+<p>把CSV::Table转换为字符串</p>
+<pre><code>&gt; cc.class
+=&gt; CSV::Table
+&gt; cc.to_csv(headers: true, force_quotes: true)
+=&gt; &quot;\&quot;a\&quot;,\&quot;b\&quot;\n\&quot;1\&quot;,\&quot;2\&quot;\n&quot;</code></pre>
+<p>to_csv(options = Hash.new) click to toggle source Returns the table as
+a complete CSV String. Headers will be listed first, then all of the
+field rows.
+This method assumes you want the #headers, unless you explicitly pass :write_headers =&gt; false.</p>
+<h2>我们预处理一下数据文件</h2>
+<p>之前的数据库中有一些文章信息不全，这里我们先删除这些条目</p>
+<pre><code>&gt;&gt; require &#39;csv&#39;
+=&gt; true
+&gt;&gt; c = CSV.table &#39;2011.csv&#39;, converters: nil; nil
+=&gt; nil
+
+&gt;&gt; c.select { |e| e[:name] == &#39;&#39; || e[:school_and_district] == &#39;&#39; || e[:title] == &#39;&#39; }.size
+=&gt; 479
+&gt;&gt; c.delete_if { |e| e[:name] == &#39;&#39; || e[:school_and_district] == &#39;&#39; || e[:title] == &#39;&#39; }.size
+=&gt; 35791</code></pre>
+<p>有些学生的姓名中竟然也含有&#39;/&#39; 这种字符</p>
+<pre><code>&gt;&gt; c.select { |e| e[:name] =~ /\// }
+=&gt; [#&lt;CSV::Row name:&quot;hu/qianqian&quot;</code></pre>
+<p>在后面也要处理。</p>
+<p>2009年还有些文章body也是空的，也去除掉</p>
+<pre><code>&gt;&gt; c.delete_if { |e| e[:name] == &#39;&#39; || e[:school] == &#39;&#39; || e[:title] == &#39;&#39; || e[:district] == &#39;&#39; || e[:date] == &#39;&#39; || e[:body] == &#39;&#39; }</code></pre>
+<p>把删除了无效条目的后的csv存起来</p>
+<pre><code>&gt;&gt; cc = c.to_csv(headers: true, force_quotes: true);nil
+=&gt; nil
+&gt;&gt; File.write(&#39;new-2011.csv&#39;, cc)
+=&gt; 106280824</code></pre>
+<hr>
+
+            </div>
+            
+        </li>
+        
+        
+        <li id="section-17">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-17">&#182;</a>
+              </div>
+              <p>方便将数组转为csv字符串的库
+其实csv自己带了这个
+CSV#</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="class"><span class="keyword">class</span> <span class="title">Array</span></span>
+  <span class="keyword">require</span> <span class="string">'csv'</span>
+  <span class="function"><span class="keyword">def</span> <span class="title">to_csv</span></span>
+    each_with_object(<span class="string">''</span>) { |e, o| o &lt;&lt; <span class="constant">CSV</span>.generate_line(e, <span class="symbol">headers:</span> <span class="keyword">true</span>, <span class="symbol">force_quotes:</span> <span class="keyword">true</span>)}
+  <span class="keyword">end</span>
+<span class="keyword">end</span></pre></div></div>
+            
+        </li>
+        
+    </ul>
+  </div>
+</body>
+</html>
