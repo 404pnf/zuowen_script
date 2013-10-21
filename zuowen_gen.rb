@@ -135,7 +135,7 @@ end
 def gen_zuowen
   csv = ['_csv/new-2009.csv', '_csv/new-2011.csv']
   csv.each { |e| gen_zw e }
-  FileUtils.cp_r 'views/.', ouput, verbose: true
+  FileUtils.cp_r 'views/.', output, verbose: true
 end
 
 # ## 一些处理CSV文件相关的命令
