@@ -1,6 +1,7 @@
 # ## 使用方法
-
+#
 #     scritp.rb input_csv_file
+#
 # ----
 
 # ## 依赖的库
@@ -11,25 +12,28 @@ require 'erubis'
 require 'kramdown'
 
 # ----
-
+#
 # ## 数据文件格式
-
+#
 # 数据文件是09年和11年上海中学生作文比赛。从drupal站点导出为csv格式。
 # 确保csv的headers包含以下信息并且拼写正确。因为这些header字符会作为键出现在模版文件中。
-
+#
+#
 # name, title, body, date, district, school
-
+#
 # 必须有至少以上几个header的数据，且header名称拼写必须和上面完全一样
 
 # ----
 
 # ## 帮助函数
-# 如果有文本字段会作为文件名使用，那么去除特殊字符
-# 对于作文正文，将其格式处理整齐
+# 1. 如果有文本字段会作为文件名使用，那么去除特殊字符
+# 1. 对于作文正文，将其格式处理整齐
+# ----
 module ZuowenHelper
+
   # 删除中英文标点符号
   # ruby报告符号有重复但我怎么也看不出来哪个重复了
-  def sanitize_filename str
+  def sanitize_filename(str)
     return '' if str.nil?
     str.gsub(/[-@\s\n.、()!?,？！，《》（）•^"\[\]\/“”]/, '_')
       .gsub(/_+/, '_')
@@ -37,14 +41,14 @@ module ZuowenHelper
       .gsub(/^_/, '')
   end
 
-  # 重排文章正文
-  # 删除tab
-  # 所有段落顶头
-  # 段落之间有一个空行，先把所有换行替换成两个换行、再删除多余连续换行
-  def normalize_body_text str
+  # 1. 重排文章正文
+  # 1. 删除tab
+  # 1. 所有段落顶头
+  # 1. 段落之间有一个空行，先把所有换行替换成两个换行、再删除多余连续换行
+  def normalize_body_text(str)
     return '' if str.nil?
-    str.to_s.gsub(/\t/, " ") # no tabs
-      .gsub(/^ +/, "")
+    str.to_s.gsub(/\t/, ' ') # no tabs
+      .gsub(/^ +/, '')
       .gsub(/\r/, "\n")
       .gsub(/\n/, "\n\n")
       .gsub(/\n\n+/, "\n\n")
@@ -57,61 +61,82 @@ end
 class ZuowenFile
   include ZuowenHelper
 
-  # 注意这几个常量
-  # 我现在的水平也就这么写了
-  TPL = 'views/post-eruby.html'
-  OUTPUT = '_output'
-
-  # hash的键就是csv的header，转为了symbol
-  # 必须先把csv转成hash，用to_hash 因为不能直接将csv::table作为hash使用
-  # 虽然在irb中CSV::table能像hash一样用，但创建对象的时候如果直接将csv作为hash用
-  # 会报无法找到键对应的值
   def initialize(csv)
     @h = csv.to_hash
-    @h[:title] = @h[:title].gsub(/\s+/, ' ').strip
-    @h[:body] = normalize_body_text @h[:body]
-    @h[:body] = Kramdown::Document.new(@h[:body], :auto_ids => false).to_html
-    @h[:title_in_filename] = sanitize_filename(@h[:title])
-    @h[:name] = sanitize_filename @h[:name]
-    @h[:year] = @h[:date].slice(0..3) # :date -> 2009-10-21
-    @context = @h.dup
   end
 
-  # 绑定@context到eruby模版
-  def write
-    FileUtils.mkdir_p(self.folder) unless File.exists?(self.folder)
-    eruby = Erubis::Eruby.new(File.read(TPL))
-    post =  eruby.evaluate(@context)
-    out = File.join(self.folder, self.filename + '.html')
-    p "generating #{out}"
-    File.write(out, post)
+  def context
+    context = @h.dup
+    h = {
+          title: title,
+          body: body,
+          title_in_filename: title_in_filename,
+          name: name,
+          year: year,
+          filename: filename,
+          path: path,
+          full_path: full_path,
+          }
+    context.merge h
   end
 
-  protected
+  private
+
+  def title
+    @h[:title].gsub(/\s+/, ' ').strip
+  end
+
+  def body
+    body = normalize_body_text @h[:body]
+    Kramdown::Document.new(body, auto_ids: false).to_html
+  end
+
+  def title_in_filename
+    sanitize_filename @h[:title]
+  end
+
+  def name
+    sanitize_filename @h[:name]
+  end
+
+  def year
+    @h[:date].slice(0..3) # :date -> 2009-10-21
+  end
 
   # 单篇文章的文件名，格式 姓名_文章标题
   def filename
-    @context[:name] + '_' + @context[:title_in_filename]
+    name + '_' + title_in_filename + '.html'
   end
 
   # 生成的文件夹，格式 输出目录 / 年 / 区 / 学校
-  def folder
-    File.join(OUTPUT, @context[:year], @context[:district], @context[:school])
+  def path
+    File.join(year, @h[:district], @h[:school])
+  end
+
+  def full_path
+    File.join path, filename
   end
 
 end
 
-# ## 脚本
-# 1. 计时
-# 2. CSV#table 中用converters: nil 是为了不把数字撰文fixnum，保持string
-#  这样在如果使用这些数字作为文件名等，不需要做to_s
-if __FILE__ == $PROGRAM_NAME
-  start = Time.now
-  input = ARGV[0] || '_csv/new-2009.csv'
-  CSV.table(input, converters: nil).each { |e| ZuowenFile.new(e).write}
-  duration = (Time.now - start).div 60
-  puts "耗时 #{duration} 分钟"
+# ## main
+def gen_zuowen
+  input = '_csv/new-2009.csv'
+  tpl = 'views/post-eruby.html'
+  output = '_output'
+  CSV.table(input, converters: nil).each do |e|
+    context = ZuowenFile.new(e).context
+    FileUtils.mkdir_p(File.join output, context[:path]) unless File.exists?(File.join output, context[:path])
+    eruby = Erubis::Eruby.new(File.read(tpl))
+    post =  eruby.evaluate(context)
+    out = File.join(output, context[:full_path])
+    p "generating #{out}"
+    File.write(out, post)
+  end
+  FileUtils.cp_r 'views/.', ouput, verbose: true
 end
+
+#gen_zuowen
 
 # ## 一些处理CSV文件相关的命令
 
@@ -170,15 +195,3 @@ end
 #     => nil
 #     >> File.write('new-2011.csv', cc)
 #     => 106280824
-
-# ----
-
-# 方便将数组转为csv字符串的库
-# 其实csv自己带了这个
-# CSV#
-#class Array
-#  require 'csv'
-#  def to_csv
-#    each_with_object('') { |e, o| o << CSV.generate_line(e, headers: true, force_quotes: true)}
-#  end
-#end
