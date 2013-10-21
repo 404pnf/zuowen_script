@@ -11,6 +11,27 @@
   <div id="container">
     <div id="background"></div>
     
+      <ul id="jump_to">
+        <li>
+          <a class="large" href="javascript:void(0);">Jump To &hellip;</a>
+          <a class="small" href="javascript:void(0);">+</a>
+          <div id="jump_wrapper">
+          <div id="jump_page">
+            
+              
+              <a class="source" href="gen-index-oop.html">
+                gen-index-oop.rb
+              </a>
+            
+              
+              <a class="source" href="zuowen_gen.html">
+                zuowen_gen.rb
+              </a>
+            
+          </div>
+        </li>
+      </ul>
+    
     <ul class="sections">
         
           <li id="title">
@@ -93,12 +114,13 @@
                 <a class="pilcrow" href="#section-5">&#182;</a>
               </div>
               <h2>帮助函数</h2>
-<p>如果有文本字段会作为文件名使用，那么去除特殊字符
-对于作文正文，将其格式处理整齐</p>
+<ol>
+<li>如果有文本字段会作为文件名使用，那么去除特殊字符</li>
+<li>对于作文正文，将其格式处理整齐</li>
+</ol>
+<hr>
 
             </div>
-            
-            <div class="content"><div class='highlight'><pre><span class="class"><span class="keyword">module</span> <span class="title">ZuowenHelper</span></span></pre></div></div>
             
         </li>
         
@@ -109,18 +131,10 @@
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-6">&#182;</a>
               </div>
-              <p>删除中英文标点符号
-ruby报告符号有重复但我怎么也看不出来哪个重复了</p>
-
+              
             </div>
             
-            <div class="content"><div class='highlight'><pre>  <span class="function"><span class="keyword">def</span> <span class="title">sanitize_filename</span> </span>str
-    <span class="keyword">return</span> <span class="string">''</span> <span class="keyword">if</span> str.<span class="keyword">nil</span>?
-    str.gsub(<span class="regexp">/[-@\s\n.、()!?,？！，《》（）•^"\[\]\/“”]/</span>, <span class="string">'_'</span>)
-      .gsub(<span class="regexp">/_+/</span>, <span class="string">'_'</span>)
-      .gsub(<span class="regexp">/_$/</span>, <span class="string">''</span>)
-      .gsub(<span class="regexp">/^_/</span>, <span class="string">''</span>)
-  <span class="keyword">end</span></pre></div></div>
+            <div class="content"><div class='highlight'><pre><span class="class"><span class="keyword">module</span> <span class="title">ZuowenHelper</span></span></pre></div></div>
             
         </li>
         
@@ -131,17 +145,41 @@ ruby报告符号有重复但我怎么也看不出来哪个重复了</p>
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-7">&#182;</a>
               </div>
-              <p>重排文章正文
-删除tab
-所有段落顶头
-段落之间有一个空行，先把所有换行替换成两个换行、再删除多余连续换行</p>
+              <p>删除中英文标点符号
+ruby报告符号有重复但我怎么也看不出来哪个重复了</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>  <span class="function"><span class="keyword">def</span> <span class="title">normalize_body_text</span> </span>str
+            <div class="content"><div class='highlight'><pre>  <span class="function"><span class="keyword">def</span> <span class="title">sanitize_filename</span><span class="params">(str)</span></span>
     <span class="keyword">return</span> <span class="string">''</span> <span class="keyword">if</span> str.<span class="keyword">nil</span>?
-    str.to_s.gsub(<span class="regexp">/\t/</span>, <span class="string">" "</span>) <span class="comment"># no tabs</span>
-      .gsub(<span class="regexp">/^ +/</span>, <span class="string">""</span>)
+    str.gsub(<span class="regexp">/[-@\s\n.、()!?,？！，《》（）•^"\[\]\/“”]/</span>, <span class="string">'_'</span>)
+      .gsub(<span class="regexp">/_+/</span>, <span class="string">'_'</span>)
+      .gsub(<span class="regexp">/_$/</span>, <span class="string">''</span>)
+      .gsub(<span class="regexp">/^_/</span>, <span class="string">''</span>)
+  <span class="keyword">end</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-8">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-8">&#182;</a>
+              </div>
+              <ol>
+<li>重排文章正文</li>
+<li>删除tab</li>
+<li>所有段落顶头</li>
+<li>段落之间有一个空行，先把所有换行替换成两个换行、再删除多余连续换行</li>
+</ol>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  <span class="function"><span class="keyword">def</span> <span class="title">normalize_body_text</span><span class="params">(str)</span></span>
+    <span class="keyword">return</span> <span class="string">''</span> <span class="keyword">if</span> str.<span class="keyword">nil</span>?
+    str.to_s.gsub(<span class="regexp">/\t/</span>, <span class="string">' '</span>) <span class="comment"># no tabs</span>
+      .gsub(<span class="regexp">/^ +/</span>, <span class="string">''</span>)
       .gsub(<span class="regexp">/\r/</span>, <span class="string">"\n"</span>)
       .gsub(<span class="regexp">/\n/</span>, <span class="string">"\n\n"</span>)
       .gsub(<span class="regexp">/\n\n+/</span>, <span class="string">"\n\n"</span>)
@@ -153,35 +191,60 @@ ruby报告符号有重复但我怎么也看不出来哪个重复了</p>
         </li>
         
         
-        <li id="section-8">
+        <li id="section-9">
             <div class="annotation">
               
               <div class="pilwrap for-h2">
-                <a class="pilcrow" href="#section-8">&#182;</a>
+                <a class="pilcrow" href="#section-9">&#182;</a>
               </div>
               <h2>封装作文对象</h2>
 
             </div>
             
             <div class="content"><div class='highlight'><pre><span class="class"><span class="keyword">class</span> <span class="title">ZuowenFile</span></span>
-  <span class="keyword">include</span> <span class="constant">ZuowenHelper</span></pre></div></div>
-            
-        </li>
-        
-        
-        <li id="section-9">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-9">&#182;</a>
-              </div>
-              <p>注意这几个常量
-我现在的水平也就这么写了</p>
+  <span class="keyword">include</span> <span class="constant">ZuowenHelper</span>
 
-            </div>
-            
-            <div class="content"><div class='highlight'><pre>  <span class="constant">TPL</span> = <span class="string">'views/newpost-eruby.html'</span>
-  <span class="constant">OUTPUT</span> = <span class="string">'_newoutput'</span></pre></div></div>
+  <span class="function"><span class="keyword">def</span> <span class="title">initialize</span><span class="params">(csv)</span></span>
+    <span class="variable">@h</span> = csv.to_hash
+  <span class="keyword">end</span>
+
+  <span class="function"><span class="keyword">def</span> <span class="title">context</span></span>
+    context = <span class="variable">@h</span>.dup
+    h = {
+          <span class="symbol">title:</span> title,
+          <span class="symbol">body:</span> body,
+          <span class="symbol">title_in_filename:</span> title_in_filename,
+          <span class="symbol">name:</span> name,
+          <span class="symbol">year:</span> year,
+          <span class="symbol">filename:</span> filename,
+          <span class="symbol">path:</span> path,
+          <span class="symbol">full_path:</span> full_path,
+          }
+    context.merge h
+  <span class="keyword">end</span>
+
+  private
+
+  <span class="function"><span class="keyword">def</span> <span class="title">title</span></span>
+    <span class="variable">@h</span>[<span class="symbol">:title</span>].gsub(<span class="regexp">/\s+/</span>, <span class="string">' '</span>).strip
+  <span class="keyword">end</span>
+
+  <span class="function"><span class="keyword">def</span> <span class="title">body</span></span>
+    body = normalize_body_text <span class="variable">@h</span>[<span class="symbol">:body</span>]
+    <span class="constant">Kramdown::Document</span>.new(body, <span class="symbol">auto_ids:</span> <span class="keyword">false</span>).to_html
+  <span class="keyword">end</span>
+
+  <span class="function"><span class="keyword">def</span> <span class="title">title_in_filename</span></span>
+    sanitize_filename <span class="variable">@h</span>[<span class="symbol">:title</span>]
+  <span class="keyword">end</span>
+
+  <span class="function"><span class="keyword">def</span> <span class="title">name</span></span>
+    sanitize_filename <span class="variable">@h</span>[<span class="symbol">:name</span>]
+  <span class="keyword">end</span>
+
+  <span class="function"><span class="keyword">def</span> <span class="title">year</span></span>
+    <span class="variable">@h</span>[<span class="symbol">:date</span>].slice(<span class="number">0</span>..<span class="number">3</span>) <span class="comment"># :date -&gt; 2009-10-21</span>
+  <span class="keyword">end</span></pre></div></div>
             
         </li>
         
@@ -192,22 +255,12 @@ ruby报告符号有重复但我怎么也看不出来哪个重复了</p>
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-10">&#182;</a>
               </div>
-              <p>hash的键就是csv的header，转为了symbol
-必须先把csv转成hash，用to_hash 因为不能直接将csv::table作为hash使用
-虽然在irb中CSV::table能像hash一样用，但创建对象的时候如果直接将csv作为hash用
-会报无法找到键对应的值</p>
+              <p>单篇文章的文件名，格式 姓名_文章标题</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>  <span class="function"><span class="keyword">def</span> <span class="title">initialize</span><span class="params">(csv)</span></span>
-    <span class="variable">@h</span> = csv.to_hash
-    <span class="variable">@h</span>[<span class="symbol">:title</span>] = <span class="variable">@h</span>[<span class="symbol">:title</span>].gsub(<span class="regexp">/\s+/</span>, <span class="string">' '</span>).strip
-    <span class="variable">@h</span>[<span class="symbol">:body</span>] = normalize_body_text <span class="variable">@h</span>[<span class="symbol">:body</span>]
-    <span class="variable">@h</span>[<span class="symbol">:body</span>] = <span class="constant">Kramdown::Document</span>.new(<span class="variable">@h</span>[<span class="symbol">:body</span>], <span class="symbol">:auto_ids</span> =&gt; <span class="keyword">false</span>).to_html
-    <span class="variable">@h</span>[<span class="symbol">:title_in_filename</span>] = sanitize_filename(<span class="variable">@h</span>[<span class="symbol">:title</span>])
-    <span class="variable">@h</span>[<span class="symbol">:name</span>] = sanitize_filename <span class="variable">@h</span>[<span class="symbol">:name</span>]
-    <span class="variable">@h</span>[<span class="symbol">:year</span>] = <span class="variable">@h</span>[<span class="symbol">:date</span>].slice(<span class="number">0</span>..<span class="number">3</span>) <span class="comment"># :date -&gt; 2009-10-21</span>
-    <span class="variable">@context</span> = <span class="variable">@h</span>.dup
+            <div class="content"><div class='highlight'><pre>  <span class="function"><span class="keyword">def</span> <span class="title">filename</span></span>
+    name + <span class="string">'_'</span> + title_in_filename + <span class="string">'.html'</span>
   <span class="keyword">end</span></pre></div></div>
             
         </li>
@@ -219,20 +272,19 @@ ruby报告符号有重复但我怎么也看不出来哪个重复了</p>
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-11">&#182;</a>
               </div>
-              <p>绑定@context到eruby模版</p>
+              <p>生成的文件夹，格式 输出目录 / 年 / 区 / 学校</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>  <span class="function"><span class="keyword">def</span> <span class="title">write</span></span>
-    <span class="constant">FileUtils</span>.mkdir_p(<span class="keyword">self</span>.folder) <span class="keyword">unless</span> <span class="constant">File</span>.exists?(<span class="keyword">self</span>.folder)
-    eruby = <span class="constant">Erubis::Eruby</span>.new(<span class="constant">File</span>.read(<span class="constant">TPL</span>))
-    post =  eruby.evaluate(<span class="variable">@context</span>)
-    out = <span class="constant">File</span>.join(<span class="keyword">self</span>.folder, <span class="keyword">self</span>.filename + <span class="string">'.html'</span>)
-    p <span class="string">"generating <span class="subst">#{out}</span>"</span>
-    <span class="constant">File</span>.write(out, post)
+            <div class="content"><div class='highlight'><pre>  <span class="function"><span class="keyword">def</span> <span class="title">path</span></span>
+    <span class="constant">File</span>.join(year, <span class="variable">@h</span>[<span class="symbol">:district</span>], <span class="variable">@h</span>[<span class="symbol">:school</span>])
   <span class="keyword">end</span>
 
-  protected</pre></div></div>
+  <span class="function"><span class="keyword">def</span> <span class="title">full_path</span></span>
+    <span class="constant">File</span>.join path, filename
+  <span class="keyword">end</span>
+
+<span class="keyword">end</span></pre></div></div>
             
         </li>
         
@@ -240,16 +292,27 @@ ruby报告符号有重复但我怎么也看不出来哪个重复了</p>
         <li id="section-12">
             <div class="annotation">
               
-              <div class="pilwrap ">
+              <div class="pilwrap for-h2">
                 <a class="pilcrow" href="#section-12">&#182;</a>
               </div>
-              <p>单篇文章的文件名，格式 姓名_文章标题</p>
+              <h2>main</h2>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>  <span class="function"><span class="keyword">def</span> <span class="title">filename</span></span>
-    <span class="variable">@context</span>[<span class="symbol">:name</span>] + <span class="string">'_'</span> + <span class="variable">@context</span>[<span class="symbol">:title_in_filename</span>]
-  <span class="keyword">end</span></pre></div></div>
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">def</span> <span class="title">gen_zuowen</span></span>
+  input = <span class="string">'_csv/new-2009.csv'</span>
+  tpl = <span class="string">'views/post-eruby.html'</span>
+  output = <span class="string">'output'</span>
+  <span class="constant">CSV</span>.table(input, <span class="symbol">converters:</span> <span class="keyword">nil</span>).each <span class="keyword">do</span> |e|
+    context = <span class="constant">ZuowenFile</span>.new(e).context
+    <span class="constant">FileUtils</span>.mkdir_p(<span class="constant">File</span>.join output, context[<span class="symbol">:path</span>]) <span class="keyword">unless</span> <span class="constant">File</span>.exists?(<span class="constant">File</span>.join output, context[<span class="symbol">:path</span>])
+    eruby = <span class="constant">Erubis::Eruby</span>.new(<span class="constant">File</span>.read(tpl))
+    post =  eruby.evaluate(context)
+    out = <span class="constant">File</span>.join(output, context[<span class="symbol">:full_path</span>])
+    p <span class="string">"generating <span class="subst">#{out}</span>"</span>
+    <span class="constant">File</span>.write(out, post)
+  <span class="keyword">end</span>
+<span class="keyword">end</span></pre></div></div>
             
         </li>
         
@@ -260,52 +323,8 @@ ruby报告符号有重复但我怎么也看不出来哪个重复了</p>
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-13">&#182;</a>
               </div>
-              <p>生成的文件夹，格式 输出目录 / 年 / 区 / 学校</p>
-
-            </div>
-            
-            <div class="content"><div class='highlight'><pre>  <span class="function"><span class="keyword">def</span> <span class="title">folder</span></span>
-    <span class="constant">File</span>.join(<span class="constant">OUTPUT</span>, <span class="variable">@context</span>[<span class="symbol">:year</span>], <span class="variable">@context</span>[<span class="symbol">:district</span>], <span class="variable">@context</span>[<span class="symbol">:school</span>])
-  <span class="keyword">end</span>
-
-<span class="keyword">end</span></pre></div></div>
-            
-        </li>
-        
-        
-        <li id="section-14">
-            <div class="annotation">
-              
-              <div class="pilwrap for-h2">
-                <a class="pilcrow" href="#section-14">&#182;</a>
-              </div>
-              <h2>脚本</h2>
-<ol>
-<li>计时</li>
-<li>CSV#table 中用converters: nil 是为了不把数字撰文fixnum，保持string
-这样在如果使用这些数字作为文件名等，不需要做to_s</li>
-</ol>
-
-            </div>
-            
-            <div class="content"><div class='highlight'><pre><span class="keyword">if</span> __FILE_<span class="number">_</span> == <span class="variable">$PROGRAM_NAME</span>
-  start = <span class="constant">Time</span>.now
-  input = <span class="constant">ARGV</span>[<span class="number">0</span>] || <span class="string">'_csv/new-2009.csv'</span>
-  <span class="constant">CSV</span>.table(input, <span class="symbol">converters:</span> <span class="keyword">nil</span>).each { |e| <span class="constant">ZuowenFile</span>.new(e).write}
-  duration = (<span class="constant">Time</span>.now - start).div <span class="number">60</span>
-  puts <span class="string">"耗时 <span class="subst">#{duration}</span> 分钟"</span>
-<span class="keyword">end</span></pre></div></div>
-            
-        </li>
-        
-        
-        <li id="section-15">
-            <div class="annotation">
-              
-              <div class="pilwrap for-h2">
-                <a class="pilcrow" href="#section-15">&#182;</a>
-              </div>
-              <h2>一些处理CSV文件相关的命令</h2>
+              <p>gen_zuowen</p>
+<h2>一些处理CSV文件相关的命令</h2>
 <p>CSV header, no space is allowed, space will be converted to underscore &#39;_&#39;
 name,school_and_district,grade,type,title,body,nid,date</p>
 <p>如果csv某列数据为空，那么会是空字符串 &quot;&quot;</p>
@@ -350,28 +369,6 @@ initialize&#39;: undefined method `[]=&#39; for nil:NilClass (NoMethodError)</p>
 =&gt; nil
 &gt;&gt; File.write(&#39;new-2011.csv&#39;, cc)
 =&gt; 106280824</code></pre>
-<hr>
-
-            </div>
-            
-        </li>
-        
-        
-        <li id="section-16">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-16">&#182;</a>
-              </div>
-              <p>方便将数组转为csv字符串的库
-其实csv自己带了这个
-CSV#
-class Array
- require &#39;csv&#39;
- def to_csv
-   each_with_object(&#39;&#39;) { |e, o| o &lt;&lt; CSV.generate_line(e, headers: true, force_quotes: true)}
- end
-end</p>
 
             </div>
             
