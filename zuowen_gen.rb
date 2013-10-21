@@ -70,10 +70,8 @@ class ZuowenFile
     h = {
           title: title,
           body: body,
-          title_in_filename: title_in_filename,
           name: name,
           year: year,
-          filename: filename,
           path: path,
           full_path: full_path,
           }
@@ -120,8 +118,7 @@ class ZuowenFile
 end
 
 # ## main
-def gen_zuowen
-  input = '_csv/new-2009.csv'
+def gen_zw(input)
   tpl = 'views/post-eruby.html'
   output = '_output'
   CSV.table(input, converters: nil).each do |e|
@@ -130,13 +127,16 @@ def gen_zuowen
     eruby = Erubis::Eruby.new(File.read(tpl))
     post =  eruby.evaluate(context)
     out = File.join(output, context[:full_path])
-    p "generating #{out}"
+    # p "generating #{out}"
     File.write(out, post)
   end
-  FileUtils.cp_r 'views/.', ouput, verbose: true
 end
 
-#gen_zuowen
+def gen_zuowen
+  csv = ['_csv/new-2009.csv', '_csv/new-2011.csv']
+  csv.each { |e| gen_zw e }
+  FileUtils.cp_r 'views/.', ouput, verbose: true
+end
 
 # ## 一些处理CSV文件相关的命令
 

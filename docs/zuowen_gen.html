@@ -213,10 +213,8 @@ ruby报告符号有重复但我怎么也看不出来哪个重复了</p>
     h = {
           <span class="symbol">title:</span> title,
           <span class="symbol">body:</span> body,
-          <span class="symbol">title_in_filename:</span> title_in_filename,
           <span class="symbol">name:</span> name,
           <span class="symbol">year:</span> year,
-          <span class="symbol">filename:</span> filename,
           <span class="symbol">path:</span> path,
           <span class="symbol">full_path:</span> full_path,
           }
@@ -299,20 +297,15 @@ ruby报告符号有重复但我怎么也看不出来哪个重复了</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">def</span> <span class="title">gen_zuowen</span></span>
-  input = <span class="string">'_csv/new-2009.csv'</span>
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">def</span> <span class="title">gen_zw</span><span class="params">(input)</span></span>
   tpl = <span class="string">'views/post-eruby.html'</span>
-  output = <span class="string">'output'</span>
+  output = <span class="string">'_output'</span>
   <span class="constant">CSV</span>.table(input, <span class="symbol">converters:</span> <span class="keyword">nil</span>).each <span class="keyword">do</span> |e|
     context = <span class="constant">ZuowenFile</span>.new(e).context
     <span class="constant">FileUtils</span>.mkdir_p(<span class="constant">File</span>.join output, context[<span class="symbol">:path</span>]) <span class="keyword">unless</span> <span class="constant">File</span>.exists?(<span class="constant">File</span>.join output, context[<span class="symbol">:path</span>])
     eruby = <span class="constant">Erubis::Eruby</span>.new(<span class="constant">File</span>.read(tpl))
     post =  eruby.evaluate(context)
-    out = <span class="constant">File</span>.join(output, context[<span class="symbol">:full_path</span>])
-    p <span class="string">"generating <span class="subst">#{out}</span>"</span>
-    <span class="constant">File</span>.write(out, post)
-  <span class="keyword">end</span>
-<span class="keyword">end</span></pre></div></div>
+    out = <span class="constant">File</span>.join(output, context[<span class="symbol">:full_path</span>])</pre></div></div>
             
         </li>
         
@@ -323,8 +316,30 @@ ruby报告符号有重复但我怎么也看不出来哪个重复了</p>
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-13">&#182;</a>
               </div>
-              <p>gen_zuowen</p>
-<h2>一些处理CSV文件相关的命令</h2>
+              <p>p &quot;generating #{out}&quot;</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="constant">File</span>.write(out, post)
+  <span class="keyword">end</span>
+<span class="keyword">end</span>
+
+<span class="function"><span class="keyword">def</span> <span class="title">gen_zuowen</span></span>
+  csv = [<span class="string">'_csv/new-2009.csv'</span>, <span class="string">'_csv/new-2011.csv'</span>]
+  csv.each { |e| gen_zw e }
+  <span class="constant">FileUtils</span>.cp_r <span class="string">'views/.'</span>, ouput, <span class="symbol">verbose:</span> <span class="keyword">true</span>
+<span class="keyword">end</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-14">
+            <div class="annotation">
+              
+              <div class="pilwrap for-h2">
+                <a class="pilcrow" href="#section-14">&#182;</a>
+              </div>
+              <h2>一些处理CSV文件相关的命令</h2>
 <p>CSV header, no space is allowed, space will be converted to underscore &#39;_&#39;
 name,school_and_district,grade,type,title,body,nid,date</p>
 <p>如果csv某列数据为空，那么会是空字符串 &quot;&quot;</p>
