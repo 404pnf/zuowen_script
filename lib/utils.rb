@@ -2,10 +2,10 @@
 # helper function
 def sanitize_filename str
   return '' if str == nil
-  str.gsub(/[-@\s\n.、()!?,？！，《》（）•^"\[\]\/“”‘]/, '_')
+  str.gsub(/[ -@\s\n.、()!?,？！，《》（）•^\[\]\/""“‘']/, '_')
     .gsub(/_+/, '_')
     .gsub(/_$/, '')
-    .gsub(/^_/, '')   
+    .gsub(/^_/, '')
 end
 def normalize_body_text str
   # 重排文章正文

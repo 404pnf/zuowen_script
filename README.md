@@ -1,7 +1,7 @@
 # 生成站点
 
-		zuowen_gen.rob _csv/new-2011.csv
-		zuowen_gen.rob _csv/new-2009.csv
+		zuowen_gen.rb _csv/new-2011.csv
+		zuowen_gen.rb _csv/new-2009.csv
 
 生成的html在_output目录。
 

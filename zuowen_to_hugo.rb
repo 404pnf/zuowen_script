@@ -1,15 +1,15 @@
 # ## 使用方法
 #
-#     scritp.rb input_csv_file
+#   直接运行，会处理 ['_csv/new-2009.csv', '_csv/new-2011.csv'] 中的内容
 #
 # ----
 
 # ## 依赖的库
 require 'csv'
-require 'yaml'
+# require 'yaml'
 require 'fileutils'
 require 'erubis'
-require 'kramdown'
+# require 'kramdown'
 
 # ----
 #
@@ -30,7 +30,6 @@ require 'kramdown'
 # 1. 对于作文正文，将其格式处理整齐
 # ----
 module ZuowenHelper
-
   # 删除中英文标点符号
   # ruby报告符号有重复但我怎么也看不出来哪个重复了
   def sanitize_filename(str)
@@ -67,14 +66,13 @@ class ZuowenFile
 
   def context
     context = @h.dup
-    h = {
-          title: title,
+    h = { title: title,
           body: body,
           name: name,
           year: year,
           path: path,
-          full_path: full_path,
-          }
+          full_path: full_path
+        }
     context.merge h
   end
 
@@ -85,8 +83,7 @@ class ZuowenFile
   end
 
   def body
-    body = normalize_body_text @h[:body]
-    Kramdown::Document.new(body, auto_ids: false).to_html
+    normalize_body_text @h[:body]
   end
 
   def title_in_filename
@@ -98,36 +95,37 @@ class ZuowenFile
   end
 
   def year
-    @h[:date].slice(0..3) # :date -> 2009-10-21
+    @h[:date] # :date -> 2009-10-21
   end
 
   # 单篇文章的文件名，格式 姓名_文章标题
   def filename
-    name + '_' + title_in_filename + '.html'
+    name + '_' + title_in_filename + '.md'
   end
 
   # 生成的文件夹，格式 输出目录 / 年 / 区 / 学校
   def path
-    File.join(year, @h[:district], @h[:school])
+    File.join(year[0..3], @h[:district], @h[:school])
   end
 
   def full_path
     File.join path, filename
   end
-
 end
 
 # ## main
 def gen_zw(input)
-  tpl = 'views/post-eruby.html'
-  output = '_output'
-  CSV.table(input, converters: nil).each do |e|
+  tpl = 'views/post-yaml.erb'
+  output = '_for_hugo'
+  CSV.table(input, converters: nil).each_with_index do |e, i|
     context = ZuowenFile.new(e).context
-    FileUtils.mkdir_p(File.join output, context[:path]) unless File.exists?(File.join output, context[:path])
     eruby = Erubis::Eruby.new(File.read(tpl))
     post =  eruby.evaluate(context)
+    path = File.join(output, context[:path])
+    FileUtils.mkdir_p(path) unless File.exist?(path)
     out = File.join(output, context[:full_path])
-    # p "generating #{out}"
+    p "generating #{out}."
+    p "第#{i + 1}篇文章。"
     File.write(out, post)
   end
 end
@@ -135,8 +133,11 @@ end
 def gen_zuowen
   csv = ['_csv/new-2009.csv', '_csv/new-2011.csv']
   csv.each { |e| gen_zw e }
-  FileUtils.cp_r 'views/.', output, verbose: true
+  # FileUtils.cp_r 'views/.', output, verbose: true
 end
+
+# 干活啦
+gen_zuowen
 
 # ## 一些处理CSV文件相关的命令
 
