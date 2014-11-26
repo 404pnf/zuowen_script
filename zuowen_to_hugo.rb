@@ -10,6 +10,7 @@ require 'csv'
 require 'fileutils'
 require 'erubis'
 # require 'kramdown'
+# require 'parallel' # 不会提高速度。反而减慢了速度
 
 # ----
 #
@@ -34,7 +35,7 @@ module ZuowenHelper
   # ruby报告符号有重复但我怎么也看不出来哪个重复了
   def sanitize_filename(str)
     return '' if str.nil?
-    str.gsub(/[-@\s\n.、()!?,？！，《》（）•^"\[\]\/“”]/, '_')
+    str.gsub(/[-@\s\n.、()!?,？！，《》（）•^"\[\]\/“”']/, '_')
       .gsub(/_+/, '_')
       .gsub(/_$/, '')
       .gsub(/^_/, '')
@@ -52,7 +53,6 @@ module ZuowenHelper
       .gsub(/\n/, "\n\n")
       .gsub(/\n\n+/, "\n\n")
   end
-
   module_function :sanitize_filename, :normalize_body_text
 end
 
@@ -79,7 +79,9 @@ class ZuowenFile
   private
 
   def title
-    @h[:title].gsub(/\s+/, ' ').strip
+    # hugo的yaml中的title不能有引号，因为它是用引号括起来的字符串
+    # 也不能有反斜杠，好像特别挑剔。
+    sanitize_filename(@h[:title]).strip
   end
 
   def body
@@ -116,7 +118,7 @@ end
 # ## main
 def gen_zw(input)
   tpl = 'views/post-yaml.erb'
-  output = '_for_hugo'
+  output = 'hugo-site/content'
   CSV.table(input, converters: nil).each_with_index do |e, i|
     context = ZuowenFile.new(e).context
     eruby = Erubis::Eruby.new(File.read(tpl))
@@ -131,13 +133,22 @@ def gen_zw(input)
 end
 
 def gen_zuowen
-  csv = ['_csv/new-2009.csv', '_csv/new-2011.csv']
+  csv = ['_csv/new-2011.csv', '_csv/new-2009.csv']
   csv.each { |e| gen_zw e }
   # FileUtils.cp_r 'views/.', output, verbose: true
 end
 
+# benchmark tools
+def time_it(&block)
+  start = Time.now
+  block.call
+  duration = Time.now - start
+  p "耗时#{duration}秒。"
+  duration
+end
+
 # 干活啦
-gen_zuowen
+time_it { gen_zuowen }
 
 # ## 一些处理CSV文件相关的命令
 
