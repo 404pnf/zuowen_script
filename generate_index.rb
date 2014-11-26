@@ -32,7 +32,6 @@ module GenIndex
   #
   # ----
   class IndexHtml
-
     require 'cgi'
     require 'erubis'
 
@@ -49,8 +48,7 @@ module GenIndex
       eruby = Erubis::Eruby.new(File.read(@tpl))
       index_html =  eruby.evaluate(@context)
       out = File.join(@path, 'index.html')
-      p "deleting #{ out }"
-      File.delete out if File.exists?(out)
+      File.delete(out).tap { p "deleting #{ out }" } if File.exist?(out)
       p "generating #{ out }"
       File.write(out, index_html)
     end
@@ -61,7 +59,7 @@ module GenIndex
       {
         title: title,
         links: links,
-        domain: @domain,
+        domain: @domain
       }
     end
 
@@ -74,11 +72,9 @@ module GenIndex
     end
 
     def links
-      files.map { |e| [e.sub(/.html$/, ''), CGI.escape(e)] }.sort
+      files.map { |e| [e.sub(/.html$/, '').gsub('_', ' '), CGI.escape(e)] }.sort
     end
-
   end # end class
-
 end # end Module
 
 # ## 干活
